@@ -124,6 +124,3 @@ ncores<-function(cores_choice){
   }
   return (cores_choice)
 }
-
-
-
