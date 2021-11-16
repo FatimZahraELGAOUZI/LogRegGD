@@ -1,3 +1,6 @@
+source("R/Check_Data.R", chdir=T)
+source("R/LogisticReg_GradDesc_Fonctions.R", chdir=T)
+
 #Consttantes
 
 #Affichage
@@ -8,13 +11,14 @@ MODE_POSSIBLES = "Modes possibles: "
 ERREUR_MODE_INCORRECT="Mode incorrect"
 ERREUR_BATCH_SIZE="Le batch-size depasse le nombre de donnees"
 ERREUR_NOMBRE_MODALITE="La variable cible a plus de  2 modalites"
+ERREUR_SEED="TRUE/FALSE"
+ERREUR_ITER_MAX="iter_max doit etre imperativement positif"
 
 
 
 #Definition classe
 definitionClasse <- list(model=NULL)
 class(definitionClasse ) <- "CalculLogRegGD"
-
 
 #' Title
 #'
@@ -28,19 +32,22 @@ class(definitionClasse ) <- "CalculLogRegGD"
 #' @return test
 #' @export
 #'
-fit <- function(formula,data, mode, batch_size="32", ncores,itermax){
+fit <- function(formula,data, mode, ncores=NULL,max_iter = 500,tol = 1e-4,eta = 0.3,seed = TRUE, batch_size=32){
 
 
   #On en profite pour introduire les contrôles
   #Controle:- Mode
   controlerMode(mode)
-  controlerBatch(batch_size, data)
-  donneesModel=formule(formula,data)
+  controlerItermax(max_iter)
+  batch_size=controlerBatch(batch_size, data,mode)
+  x = formule_donnees_exp(formula, data)
+  y= formule_extract_cible(formula, data)
+  controlerSeed(seed)
   ncores=ncores(ncores)
 
   #Creation de l'instance
-  instance <- list()
-  instance$model="test"
+  instance <- list(model=NULL)
+  instance$model= GradDescente(x, y, eta = eta, max_iter = max_iter, tol = tol, mode_desc=mode, batch_size=batch_size, seed = seed)
   # à remplir par les autres modules faits par l'equipe
   class(instance) <- "CalculLogRegGD"
 
@@ -67,11 +74,30 @@ controlerNombreModalites<-function(y){
 
 }
 
-controlerBatch<-function(batch_size,donnees){
-  if(batch_size>=nrow(donnees))
-    stop (ERREUR_BATCH_SIZE)
 
+
+controlerBatch<-function(batch_size,donnees,mode){
+  if(mode=="online"){
+    return (NULL);
+  }
+  if( batch_size>=nrow(donnees) | batch_size<0 ){
+    stop (ERREUR_BATCH_SIZE)
+  }
+  return(batch_size)
 }
+
+
+controlerItermax<-function(max_iter){
+  if( max_iter <0)
+    stop (ERREUR_ITER_MAX)
+}
+
+controlerSeed<-function(seed)
+{
+  if(!is.boolean(seed))
+    stop (ERREUR_SEED)
+  }
+
 # # Recuperation des donnees
 # formule<- function (formula, donnees){
 #
@@ -95,9 +121,9 @@ controlerBatch<-function(batch_size,donnees){
 formule_donnees_exp<- function (formula, donnees){
 
   # recuperation des variables explicatives (right of tilde)
-  var_exp <- model_matrix(donnees, formula)
+  x <- model_matrix(donnees, formula)
 
-  return (var_exp)
+  return (x)
 }
 
 formule_extract_cible<- function (formula, donnees){
@@ -108,19 +134,27 @@ formule_extract_cible<- function (formula, donnees){
   # controler Y
   Y<-as.matrix.data.frame(var[1])
   controlerNombreModalites(Y)
-  print(class(Y))
-  return (var[1])
+  return (Y)
 }
 
 
 
 #Recuperation des coeurs et controle
 ncores<-function(cores_choice){
-  if (cores_choice > parallel::detectCores() | cores_choice <= 0 ){
-    cores_choice = parallel::detectCores()#utiliser max-1
+  print(cores_choice)
+  if (is.null(cores_choice) || cores_choice > parallel::detectCores() || cores_choice <= 0 ){
+    cores_choice = parallel::detectCores()-1
   }
   else{
     cores_choice = cores_choice
   }
   return (cores_choice)
 }
+
+# c=c(1,2,3,4)
+# a=c(1,0,1,0)
+# b=c(1,2,3,3)
+# tab=c(a,b,c)
+# tab=data.frame(a=a, b=b, c=c)
+# fit(a~b, tab, mode="online")
+
