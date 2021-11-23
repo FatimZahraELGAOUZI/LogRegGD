@@ -2,11 +2,6 @@
 #modele <- glm(income ~ ., data = adult, family = binomial)
 #print(modele$coefficients)
 
-
-library(fastDummies)
-library(dplyr)
-library(tidyr)
-
 #Récupération du mode et remplacement des NA par le mode
 getmode <- function(v) {
   uniqv <- unique(v)
@@ -14,20 +9,22 @@ getmode <- function(v) {
 }
 
 # Fonction de vérification des données
-CheckDataset <- function(d, cible)
+tranformDataset<- function(d, cible)
 {
   # Recoder la variable cible en 0/1 si ce n'est pas le cas
-  if (is.factor(cible)){
+
+  if (is.factor(as.factor(cible))){
     w <- levels(cible)
     cible<-fastDummies::dummy_cols(cible)
     cible<-cible[,2]
-    print(paste(w[2], "correspond à la modalité 0"))
-    print(paste(w[1], "correspond à la modalité 1"))  
+    print(paste(w[2], "correspond a la modalite 0"))
+    print(paste(w[1], "correspond a la modalite 1"))
+
   } #A gérer dans les errors si c'est pas un factor ou si c'est pas en 0 ou 1
-      
+
   # Transformer les variables explicatives charactères en factor
   d = as.data.frame(unclass(d), stringsAsFactor = TRUE)
-      
+
   # Récupérer la liste des variables explicatives qualitatives et les recoder en 0/1
   id_quali = sapply(d, function(x){is.factor(x)}) #remplacer d par expli
   if (sum(id_quali)>0){
@@ -37,7 +34,7 @@ CheckDataset <- function(d, cible)
   } else {
      quali <- NULL
   }
-   
+
   #Récupérer la liste des variables explicatives quantitatives
   id_quanti = sapply(d,function(x){is.numeric(x)|is.double(x)}) #remplacer d par expli
   if (sum(id_quanti)>0){
@@ -46,19 +43,17 @@ CheckDataset <- function(d, cible)
   } else {
     quanti <- NULL
   }
-    
+
   # Recombiner les explicatives
   if (is.null(quali)){
     expli <- quanti
   } else if (is.null(quanti)) {
     expli <- quali
   } else {
-    expli <- cbind(quali, quanti)  
+    expli <- cbind(quali, quanti)
   }
+  print(expli)
   return(list(x = expli, y = cible))
 }
 
-library(liver)
-data("adult")
-#x=1
-CheckDataset(adult,adult$income)
+

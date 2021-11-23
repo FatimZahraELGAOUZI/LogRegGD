@@ -5,3 +5,7 @@ usethis::use_package("stats")
 usethis::use_package("fastDummies")
 usethis::use_package("liver")
 usethis::use_package("rapportools")
+usethis::use_package("dplyr")
+usethis::use_package("tidyr")
+
+
