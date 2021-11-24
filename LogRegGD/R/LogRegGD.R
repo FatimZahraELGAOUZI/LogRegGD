@@ -1,17 +1,17 @@
-source("R/Check_Data.R")
-source("R/LogisticReg_GradDesc.R")
+ #source("R/Check_Data.R")
+#source("R/LogisticReg_GradDesc.R")
 
 #Consttantes
 
 #Affichage
-TYPE_MODES <- c('batch','online','mini_batch')
+TYPE_MODES <- c('batch','online','mini-batch')
 MODE_POSSIBLES = "Modes possibles: "
 #Message d'erreur
 ERREUR_MODE_INCORRECT="Mode incorrect"
 ERREUR_BATCH_SIZE="Le batch-size depasse le nombre de donnees"
 ERREUR_NOMBRE_MODALITE="La variable cible a plus de  2 modalites"
 #ERREUR_SEED="TRUE/FALSE"
-ERREUR_ITER_MAX="iter_max doit etre imperativement positif"
+ERREUR_ITER_MAX="iter_max doit imperativement etre positif"
 ERREUR_TYPE_DATA="The input is not a dataframe"
 # message derreur formula
 
@@ -34,22 +34,23 @@ class(definitionClasse ) <- "CalculLogRegGD"
 #' @return test
 #' @export
 #'
-fit <- function(formula,data, mode, ncores=NULL,max_iter = 500,tol = 1e-4,eta = 0.3, batch_size=32){
+fit <- function(formula, data, mode="batch", ncores=NULL, max_iter = 500, tol = 1e-4, eta = 0.3, batch_size = 32){
 
 
   #On en profite pour introduire les contrôles
-  #Controles:
+  #Contrôles:
   controlerDataType(data)
   controlerMode(mode)
   controlerItermax(max_iter)
   batch_size=controlerBatch(batch_size, data,mode)
   ncores=ncores(ncores)
 
-  #Récuperation  et transformation des x et y
-  y= formule_extract_cible(formula, data)
-  data=tranformDataset(data,y)
-  x = formule_donnees_exp(formula, data[["x"]])
-  y= data[["y"]]
+  #Récupération et transformation des x et y
+  y = formule_extract_cible(formula, data)
+  x = formule_donnees_exp(formula, data)
+  data = tranformDataset(x,y)
+  x = data[["x"]]
+  y = data[["y"]]
 
 
   #Creation de l'instance
@@ -62,7 +63,7 @@ fit <- function(formula,data, mode, ncores=NULL,max_iter = 500,tol = 1e-4,eta = 
   instance$coefficient=instance$model$coef
   #la formule
   instance$formula=formula
-  print(formula$call)
+  #print(formula$call)
   #la variable à expliquer
   instance$y=y
   #la liste des modalités
@@ -77,7 +78,7 @@ fit <- function(formula,data, mode, ncores=NULL,max_iter = 500,tol = 1e-4,eta = 
   instance$var_names <- colnames(x)
 
   #instance$aic= AIC()
-  print(instance$model)
+  #print(instance$model)
   # à remplir par les autres modules faits par l'equipe
   class(instance) <- "CalculLogRegGD"
 
@@ -87,16 +88,16 @@ fit <- function(formula,data, mode, ncores=NULL,max_iter = 500,tol = 1e-4,eta = 
 ######## Surcharge Print###################
 
 print.CalculLogRegGD <- function(objet){
-  cat("Call= ",objet$call,"\n")
-  print("Coefficients:")
-  print(objet$coefficient)
+  #cat("Call : ",objet$cat,"\n")
   print(objet$formula)
-  cat("y= ",objet$y,"\n")
+  print("Coefficients :")
+  print(objet$coefficient)
+  #cat("y= ",objet$y,"\n")
   #cat("modalites= ",objet$modalites,"\n")
-  print(objet$modalites)
-  cat("nb variables explicatives= ",objet$var,"\n")
-  cat("noms des variables= ",objet$var_names,"\n")
-  cat("iter = ",objet$iter,"\n")
+  #print(objet$modalites)
+  cat("Nombre de variables explicatives : ", objet$var, "\n")
+  cat("Noms des variables : ", objet$var_names,"\n")
+  cat("Nombre d'itérations : ", objet$iter, "\n")
   #cat("p-value = ",objet$pvalue,"\n")
 }
 
@@ -161,16 +162,14 @@ controlerSeed<-function(seed)
 formule_donnees_exp<- function (formula, donnees){
 
   # recuperation des variables explicatives (right of tilde)
-  x <- model_matrix(donnees, formula)
-
+  x <- model.frame(formula, donnees)
   return (x[,-1])
 }
 
 formule_extract_cible<- function (formula, donnees){
 
   # recuperation de Y (left of tilde)
-  var<-get_all_vars(formula,donnees)
-  #print(var[1])
+  var<-model.frame(formula,donnees)
   # controler Y
   Y<-as.matrix.data.frame(var[1])
   controlerNombreModalites(Y)
@@ -181,7 +180,7 @@ formule_extract_cible<- function (formula, donnees){
 
 #Recuperation et controle des coeurs
 ncores<-function(cores_choice){
-  print(cores_choice)
+  #print(cores_choice)
   if (is.null(cores_choice) || cores_choice > parallel::detectCores() || cores_choice <= 0 ){
     cores_choice = parallel::detectCores()-1
   }
@@ -192,12 +191,69 @@ ncores<-function(cores_choice){
 }
 
 #reflexion
-# obj=fit(X9 ~ ., pima_indians_diabetes, mode="batch")
-# print(obj)
-# model<-glm(X9~.,family=binomial,data=pima_indians_diabetes)
-# model
+# pima_indians_diabetes = read.csv("pima-indians-diabetes.csv", header = T, sep=',')
+obj=fit(X9 ~ ., pima_indians_diabetes, mode="batch")
+ obj
+# d = data.frame(cbind(scale(pima_indians_diabetes[,1:8]),pima_indians_diabetes$X9))
+# model<-glm(V9~.,family=binomial,data=d)
+# model$coefficients
 #
+
+# library(liver)
+# data("adult")
+# adult[adult=="?"] <- NA
+# obj=fit(income ~ age + workclass + demogweight + gender + capital.gain + capital.loss, adult, mode="mini-batch")
+# obj
+# ind <- sapply(adult, is.numeric)
+# adult[ind] <- lapply(adult[ind], scale)
+# model<-glm(income~ age + workclass + demogweight + gender + capital.gain + capital.loss,family=binomial,data=adult)
+# model$coefficients
+
+
+# d = read.csv("Test.csv", header = T, sep=";", dec = ",")
+# obj=fit(diabete ~ ., d, mode="online")
+# print(obj)
+# d$diabete = dplyr::recode(d$diabete, "presence"=1, "absence"=0)
+# d$triceps = replace(d$triceps, is.na(d$triceps), mean(d$triceps, na.rm = TRUE))
+# d = as.data.frame(cbind(scale(d[,1:8]),d$diabete))
+# model<-glm(V9~ .,family=binomial,data=d)
+# model$coefficients
+
 # num_params = length(obj$coef) + 1
 # print(num_params)
 # tc <- lapply(obj$var,function(x,y){return(log(prop.table(table(y,x)+1,1)))},obj$y)
 # aic = 2* log(tc) + 2 * 10
+
+
+########################################################Fonction Predict###########################"""""
+
+  predict<-function (objet_Reg, newdata, type){
+   # controle des données
+   if (length(intersect(objet_Reg$var_names,colnames(newdata))) < objet_Reg$var){stop("Erreur Variables")}
+   #récupérer les variables dans l'ordre
+    pnewdata <- newdata[objet_Reg$var_names]
+     mpnewdata <- matrix(unlist(pnewdata))
+     pnewdata$intercept=1
+     pi <- RegLogFonction(mpnewdata %*% objet_Reg$coef)
+       if (type=="class"){
+           Classpred<- ifelse(pi>0.5, 1,0)
+           print(Classpred)
+         }
+     else if (type=="Prior") {
+           prob <- pi
+           print(prob)
+    }
+  }
+
+pred<-predict( obj,pima_indians_diabetes,"class")
+ #   #prediction
+ #   Pred <- model$modalites[apply(scores,1,which.max)]
+ #   return(mPred)
+ # }
+
+
+
+
+
+#
+#  }

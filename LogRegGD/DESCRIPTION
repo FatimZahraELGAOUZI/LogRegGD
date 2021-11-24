@@ -18,4 +18,5 @@ Imports:
     liver,
     rapportools,
     dplyr,
-    tidyr
+    tidyr,
+    parallel
