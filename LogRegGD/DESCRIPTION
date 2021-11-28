@@ -1,10 +1,28 @@
 Package: LogRegGD
-Title: LogRegGD
-Version: 0.0.0.9000
+Title: Implementation of binary logistic regression with stochastic gradient descent algorithm
+Version: 0.0.0.1
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+  c(
+    person(
+        given = "Fatim-Zahra",
+        family = "EL GAOUZI",
+        role = c("aut", "cre"),
+        email = "f.elgaouzi94@gmail.Com"
+        ),
+    person(
+        given="Clement",
+        family="PERENON",
+        email = "Clement.Perenon@gmail.com",
+        role = "ctb"
+        ),
+    person(
+        given="Lea",
+        family="REGAZZETTI",
+        email = "learegazzetti@gmail.com",
+        role = "ctb"
+        )
+    )
+Description: Implementation of binary logistic regression with stochastic gradient descent algorithm.
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -19,4 +37,6 @@ Imports:
     rapportools,
     dplyr,
     tidyr,
-    parallel
+    foreach,
+    doParallel,
+    timeSeries

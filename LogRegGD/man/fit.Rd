@@ -2,26 +2,47 @@
 % Please edit documentation in R/LogRegGD.R
 \name{fit}
 \alias{fit}
-\title{Title}
+\title{Fit function}
 \usage{
-fit(formula, data, mode, batch_size = "32", ncores, itermax)
+fit(
+  formula,
+  data,
+  mode = "batch",
+  ncores = NULL,
+  max_iter = 500,
+  tol = 0.001,
+  eta = 0.3,
+  batch_size = 32
+)
 }
 \arguments{
-\item{formula}{le formula}
+\item{formula}{an object of class "formula" (or one that can be coerced to that class): a symbolic description of the model to be fitted.“formula” describes the problem to be solved and must correspond to “target ~feature_1 + feature_2” if explanatory are explicitly specified, or “target ~ .” if all available variables}
 
-\item{data}{les données}
+\item{data}{the dataframe containing the variables in the model}
 
-\item{mode}{le mode d'execution}
+\item{mode}{the mode chosen to be used to update coefficients of stochastic gradient descent.We have 3 posiblities: {« batch », « online », « mini_batch »}}
 
-\item{batch_size}{size of batch}
+\item{ncores}{indicates the number of cores to be used in parallel programming}
 
-\item{ncores}{number of CPU cores}
+\item{max_iter}{is the number of iterations}
 
-\item{itermax}{iteration max}
+\item{tol}{is the minimum movement allowed for each iteration}
+
+\item{eta}{is the learning rate for gradient descent}
+
+\item{batch_size}{is the number of observations for the mini-batch mode}
 }
 \value{
-test
+The function returns an object of TYPE S3 that will be used later in the prediction function
 }
 \description{
-Title
+Fit function
+}
+\examples{
+ \dontrun{
+ fit(formula, data)
+ fit(formule, data,ncores=3, mode="batch",nnore=2)
+ fit(formule, data,ncores=3, mode="mini-batch",max_iter = 500, tol = 1e-3, eta = 0.3,batch_size=32)
+ }
+
 }

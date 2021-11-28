@@ -1,44 +1,33 @@
- #source("R/Check_Data.R")
-#source("R/LogisticReg_GradDesc.R")
 
-#Consttantes
+#Definition Objet S3
 
-#Affichage
-TYPE_MODES <- c('batch','online','mini-batch')
-MODE_POSSIBLES = "Modes possibles: "
-#Message d'erreur
-ERREUR_MODE_INCORRECT="Mode incorrect"
-ERREUR_BATCH_SIZE="Le batch-size depasse le nombre de donnees"
-ERREUR_NOMBRE_MODALITE="La variable cible a plus de  2 modalites"
-#ERREUR_SEED="TRUE/FALSE"
-ERREUR_ITER_MAX="iter_max doit imperativement etre positif"
-ERREUR_TYPE_DATA="The input is not a dataframe"
-# message derreur formula
-
-
-#Definition classe
-definitionClasse <- list(model=NULL)
-class(definitionClasse ) <- "CalculLogRegGD"
-
-#' @Title  le titre
+#' Fit function
 #'
-#' @param formula la formule
-#' @param data les données
-#' @param mode le mode d'execution
-#' @param batch_size size of batch
-#' @param max_iter bla bla
-#' @param tol bla bli
-#' @param eta bla blo
-#' @param ncores number of CPU cores
+#' @param formula an object of class "formula" (or one that can be coerced to that class): a symbolic description of the model to be fitted.“formula” describes the problem to be solved and must correspond to “target ~feature_1 + feature_2” if explanatory are explicitly specified, or “target ~ .” if all available variables
+#' @param data the dataframe containing the variables in the model
+#' @param mode the mode chosen to be used to update coefficients of stochastic gradient descent.We have 3 posiblities: {« batch », « online », « mini_batch »}
+#' @param batch_size is the number of observations for the mini-batch mode
+#' @param max_iter is the number of iterations
+#' @param tol is the minimum movement allowed for each iteration
+#' @param eta is the learning rate for gradient descent
+#' @param ncores indicates the number of cores to be used in parallel programming
 #'
-#' @return test
+#' @return The function returns an object of TYPE S3 that will be used later in the prediction function
+#'
 #' @export
 #'
-fit <- function(formula, data, mode="batch", ncores=NULL, max_iter = 500, tol = 1e-4, eta = 0.3, batch_size = 32){
-
-
+#' @examples
+#'  \dontrun{
+#'  fit(formula, data)
+#'  fit(formule, data,ncores=3, mode="batch",nnore=2)
+#'  fit(formule, data,ncores=3, mode="mini-batch",max_iter = 500, tol = 1e-3, eta = 0.3,batch_size=32)
+#'  }
+#'
+fit <- function(formula, data, mode="batch", ncores=NULL, max_iter = 500, tol = 1e-3, eta = 0.3, batch_size = 32)
+{
   #On en profite pour introduire les contrôles
   #Contrôles:
+  controlerFormula(formula)
   controlerDataType(data)
   controlerMode(mode)
   controlerItermax(max_iter)
@@ -47,213 +36,203 @@ fit <- function(formula, data, mode="batch", ncores=NULL, max_iter = 500, tol = 
 
   #Récupération et transformation des x et y
   y = formule_extract_cible(formula, data)
-  x = formule_donnees_exp(formula, data)
-  data = tranformDataset(x,y)
+  xtemp = formule_donnees_exp(formula, data)
+  data = tranformDataset(xtemp,y)
   x = data[["x"]]
   y = data[["y"]]
 
-
   #Creation de l'instance
-
-  instance <- list(call=NULL,model=NULL,coefficient=NULL,formula=NULL,y=NULL,modalites= NULL,iter=NULL,var=NULL,var_names=NULL)
-  instance$model= GradDescente(x, y, eta = eta, max_iter = max_iter, tol = tol, mode_desc=mode, batch_size=batch_size)
+  instance <- list(call=NULL,model=NULL,coefficient=NULL,formula=NULL,y=NULL,modalites= NULL,iter=NULL,mode=NULL,var=NULL,var_names=NULL, resdev = NULL, resdf = NULL, totdf = NULL, aic = NULL)
   #le modele
-  #instance$call<- paste(deparse(formula$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+  instance$model= GradDescente(x, y, eta = eta, max_iter = max_iter, tol = tol, mode_desc=mode, batch_size=batch_size, nc = ncores)
+  #l'appel à fonction fit
+  call<-match.call()
+  instance$call=call
   #les coefficients
   instance$coefficient=instance$model$coef
   #la formule
   instance$formula=formula
-  #print(formula$call)
   #la variable à expliquer
   instance$y=y
-  #la liste des modalités
-  instance$modalites <- nlevels(y)
-  # le nombre d'iteration
-  instance$iter=instance$model$nbIter
-  #log des probas a priori
-
   #le nombre de variables explicatives
   instance$var <- ncol(x)
-  #les noms des  variables explicatives
+  #les noms des variables explicatives
   instance$var_names <- colnames(x)
+  #Les moyennes et les ecarts-types des variables explicatives
+  instance$Xmeans <- apply(x, 2, mean)
+  instance$Xsd<-apply(x, 2, sd)
+  # le nombre d'iteration
+  instance$iter=instance$model$nbIter
+  # le mode de descente de gradient
+  instance$mode = controlerMode(mode)
+  # deviance residuelle
+  instance$resdev = instance$model$dev
+  instance$resdf = nrow(x)-(length(instance$coefficient)-1)-1
+  #deviance nulle
+  instance$totdf = nrow(x)-1
+  # AIC
+  instance$aic= instance$resdev + 2*length(instance$coefficient)
 
-  #instance$aic= AIC()
-  #print(instance$model)
-  # à remplir par les autres modules faits par l'equipe
-  class(instance) <- "CalculLogRegGD"
+  class(instance) <- "ObjectLogRegGD"
 
   return(instance)
 }
 
-######## Surcharge Print###################
+############################################################ Surcharge Print #####################################################
 
-print.CalculLogRegGD <- function(objet){
-  #cat("Call : ",objet$cat,"\n")
+#' the generic "print" method
+#'
+#' @param objet is the fitted object
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#'  print(objet)
+#'  }
+
+
+print.ObjectLogRegGD <- function(objet)
+{
+  cat("############################################################################################################### \n")
+  cat("\n")
+  cat("Call : \n", paste(deparse(objet$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
   print(objet$formula)
-  print("Coefficients :")
-  print(objet$coefficient)
-  #cat("y= ",objet$y,"\n")
-  #cat("modalites= ",objet$modalites,"\n")
-  #print(objet$modalites)
   cat("Nombre de variables explicatives : ", objet$var, "\n")
   cat("Noms des variables : ", objet$var_names,"\n")
   cat("Nombre d'itérations : ", objet$iter, "\n")
-  #cat("p-value = ",objet$pvalue,"\n")
-}
-
-######## Surcharge summary###################
-
-
-
-###########################################les fonctions ############################################
-
-# controlerFormula <- function(formula){
-#   as.formula(paste("y ~ x1 + x2", "x3", sep = "+"))
-# }
-
-#if (!inherits(formule,"formula")) {formule <- as.formula(formule)}
-controlerDataType <- function (data){
-  if (is.data.frame(data)==FALSE){
-    stop(ERREUR_TYPE_DATA)
-  }
-}
-controlerMode<-function(mode){
-  if(is.na (match(mode,TYPE_MODES))){
-    print (MODE_POSSIBLES)
-    print (TYPE_MODES)
-    stop(ERREUR_MODE_INCORRECT)
-  }
-  else{
-    print (paste("Mode: ",mode))
-  }
+  print("Coefficients :")
+  print(objet$coefficient)
+  cat("Residual deviance : ", objet$resdev, "\n")
+  cat("Degrees of freedom (residual) : ", objet$resdf, "\n")
+  cat("Degrees of freedom (total) : ", objet$totdf, "\n")
+  cat("AIC : ", objet$aic, "\n")
+  cat("\n")
+  cat("############################################################################################################### \n")
 
 }
 
-controlerNombreModalites<-function(y){
-  #print(y)
-  if(length(unique(y))!=2)
-    stop (ERREUR_NOMBRE_MODALITE)
-
-}
-
-controlerBatch<-function(batch_size,donnees,mode){
-  if(mode=="online"){
-    return (NULL);
-  }
-  if( batch_size>=nrow(donnees) || batch_size<0 ){
-    stop (ERREUR_BATCH_SIZE)
-  }
-  return(batch_size)
-}
-
-
-controlerItermax<-function(max_iter){
-  if( max_iter <0)
-    stop (ERREUR_ITER_MAX)
-}
-
-controlerSeed<-function(seed)
+############################################################ Surcharge Summary ###############################################
+#' the generic "Summary" method
+#'
+#' @param objet is the fitted object
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#'  \dontrun{
+#'  summary(objet)
+#'  }
+#'
+summary.ObjectLogRegGD <- function(objet)
 {
-  if(!is.boolean(seed))
-    stop (ERREUR_SEED)
-  }
+  cat("############################################################################################################### \n")
+  cat("\n")
+  cat("Call : \n", paste(deparse(objet$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+  print(objet$formula)
+  print("Coefficients :")
+  print(objet$coefficient)
+  cat("Gradient descent : ", objet$mode, "\n")
+  cat("Nombre de variables explicatives : ", objet$var, "\n")
+  cat("Noms des variables : ", objet$var_names,"\n")
+  cat("Nombre d'itérations : ", objet$iter, "\n")
+  cat("Residual deviance : ", objet$resdev, "\n")
+  cat("Degrees of freedom (residual) : ", objet$resdf, "\n")
+  cat("Degrees of freedom (total) : ", objet$totdf, "\n")
+  cat("AIC : ", objet$aic, "\n")
+  cat("\n")
+  cat("############################################################################################################### \n")
 
-
-formule_donnees_exp<- function (formula, donnees){
-
-  # recuperation des variables explicatives (right of tilde)
-  x <- model.frame(formula, donnees)
-  return (x[,-1])
-}
-
-formule_extract_cible<- function (formula, donnees){
-
-  # recuperation de Y (left of tilde)
-  var<-model.frame(formula,donnees)
-  # controler Y
-  Y<-as.matrix.data.frame(var[1])
-  controlerNombreModalites(Y)
-  return (Y)
 }
 
 
 
-#Recuperation et controle des coeurs
-ncores<-function(cores_choice){
-  #print(cores_choice)
-  if (is.null(cores_choice) || cores_choice > parallel::detectCores() || cores_choice <= 0 ){
-    cores_choice = parallel::detectCores()-1
+######################################################## Fonction Predict ###############################################
+
+#' Predict function
+#'
+#' @param objet_Reg is a S3 object provided by the function fit()
+#' @param newdata the dataframe (DataTest) that we will use to make the prediction
+#' @param type indicates the type of prediction {“class”: predicted class , “posterior”:belonging class probability}
+#'
+#' @return Function that return a list (the predicted probs,confusion matrix and error rate) or the belonging class probability
+#' @export
+#'
+#' @examples
+#'  \dontrun{
+#'  predict(objet,newdata,type)
+#'  }
+
+
+predict<-function (objet_Reg, newdata, type)
+{
+  #controle de l'objet
+  if (class(objet_Reg)!="ObjectLogRegGD")
+  {
+    stop("Object's class is not ObjectLogRegGD")
   }
-  else{
-    cores_choice = cores_choice
-  }
-  return (cores_choice)
-}
 
-#reflexion
-# pima_indians_diabetes = read.csv("pima-indians-diabetes.csv", header = T, sep=',')
-obj=fit(X9 ~ ., pima_indians_diabetes, mode="batch")
- obj
-# d = data.frame(cbind(scale(pima_indians_diabetes[,1:8]),pima_indians_diabetes$X9))
-# model<-glm(V9~.,family=binomial,data=d)
-# model$coefficients
-#
-
-# library(liver)
-# data("adult")
-# adult[adult=="?"] <- NA
-# obj=fit(income ~ age + workclass + demogweight + gender + capital.gain + capital.loss, adult, mode="mini-batch")
-# obj
-# ind <- sapply(adult, is.numeric)
-# adult[ind] <- lapply(adult[ind], scale)
-# model<-glm(income~ age + workclass + demogweight + gender + capital.gain + capital.loss,family=binomial,data=adult)
-# model$coefficients
-
-
-# d = read.csv("Test.csv", header = T, sep=";", dec = ",")
-# obj=fit(diabete ~ ., d, mode="online")
-# print(obj)
-# d$diabete = dplyr::recode(d$diabete, "presence"=1, "absence"=0)
-# d$triceps = replace(d$triceps, is.na(d$triceps), mean(d$triceps, na.rm = TRUE))
-# d = as.data.frame(cbind(scale(d[,1:8]),d$diabete))
-# model<-glm(V9~ .,family=binomial,data=d)
-# model$coefficients
-
-# num_params = length(obj$coef) + 1
-# print(num_params)
-# tc <- lapply(obj$var,function(x,y){return(log(prop.table(table(y,x)+1,1)))},obj$y)
-# aic = 2* log(tc) + 2 * 10
-
-
-########################################################Fonction Predict###########################"""""
-
-  predict<-function (objet_Reg, newdata, type){
-   # controle des données
-   if (length(intersect(objet_Reg$var_names,colnames(newdata))) < objet_Reg$var){stop("Erreur Variables")}
-   #récupérer les variables dans l'ordre
-    pnewdata <- newdata[objet_Reg$var_names]
-     mpnewdata <- matrix(unlist(pnewdata))
-     pnewdata$intercept=1
-     pi <- RegLogFonction(mpnewdata %*% objet_Reg$coef)
-       if (type=="class"){
-           Classpred<- ifelse(pi>0.5, 1,0)
-           print(Classpred)
-         }
-     else if (type=="Prior") {
-           prob <- pi
-           print(prob)
+  # # controle des donnees
+  #  if (length(intersect(objet_Reg$var_names,colnames(newdata))) < objet_Reg$var)
+  #  {
+  #  stop("Nombre de variables differents")
+  #  }
+  # controle du type
+   if (type !="class"  &&  type != "posterior"){
+     stop("type's is not correct, you must be {\"class\" or \"posterior\"}")
     }
+
+  # recuperer x et y
+  px = formule_donnees_exp(objet_Reg$formula, newdata)
+  py = formule_extract_cible(objet_Reg$formula, newdata)
+
+  #transformation des donnees
+  pquali = transformQuali(px) # remplacer NA quali par mode
+  pquanti = transformQuanti(px) # on remplace les NA par mean(newdata)
+  y = tranformDataset(px,py)$y
+
+  #centrer et reduire
+  # Recuperation des moyennes et des ecarts types des donnees
+  means <- objet_Reg$Xmeans
+  stdvs<-objet_Reg$Xsd
+  # On utilise les moyennes et les ecarts types des donnees d'entrainement pour centrer et reduire les donnees tests
+  res = as.data.frame(combine(pquali,pquanti))
+  res = scale(res, center = means[colnames(res)], scale = stdvs[colnames(res)])[,]
+
+  newdata = as.data.frame(cbind(res,y))
+
+  x = as.data.frame(newdata[,intersect(objet_Reg$var_names, colnames(newdata))])
+
+  #recuperer les variables dans l'ordre
+  pnewdata <- as.data.frame(x[,colnames(x) %in% objet_Reg$var_names])
+
+  #Ajouter l'intercept
+  pnewdata<-as.data.frame(cbind(Intercept=(rep(1,nrow(pnewdata))), pnewdata))
+
+  #calculer les proba
+  coefficient <-as.vector(objet_Reg$coefficient[objet_Reg$var_names %in% colnames(x)])
+  #ne selectionner que les coefficients correspondant aux colonnes de x
+  #car parfois certaines modalites sont dans le train et pas dans le test ou inversement
+  pnewdata<-as.matrix(pnewdata)
+
+  pi <- RegLogFonction(pnewdata %*% coefficient)
+
+  if (type=="class")
+  {
+    #classe predite
+    pred = ifelse(pi>=0.5,1,0)
+    mc = table(y, pred)
+    err = 1.0-sum(diag(mc))/sum(mc)
+    sen =
+      return(list(pred = pred, mat_conf = mc, error = err))
   }
+  else if (type=="posterior")
+  {
+    # probabilite d’appartenance aux classes
+    pred <- pi
+    return(pred = pred)
+  }
+}
 
-pred<-predict( obj,pima_indians_diabetes,"class")
- #   #prediction
- #   Pred <- model$modalites[apply(scores,1,which.max)]
- #   return(mPred)
- # }
-
-
-
-
-
-#
-#  }
