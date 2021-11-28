@@ -6,10 +6,10 @@
 #' @param formula an object of class "formula" (or one that can be coerced to that class): a symbolic description of the model to be fitted.“formula” describes the problem to be solved and must correspond to “target ~feature_1 + feature_2” if explanatory are explicitly specified, or “target ~ .” if all available variables
 #' @param data the dataframe containing the variables in the model
 #' @param mode the mode chosen to be used to update coefficients of stochastic gradient descent.We have 3 posiblities: {« batch », « online », « mini_batch »}
-#' @param batch_size is the number of observations for the mini-batch mode
+#' @param batch_size the number of observations for the mini-batch mode
 #' @param max_iter is the number of iterations
-#' @param tol is the minimum movement allowed for each iteration
-#' @param eta is the learning rate for gradient descent
+#' @param tol the minimum movement allowed for each iteration
+#' @param eta the learning rate for gradient descent
 #' @param ncores indicates the number of cores to be used in parallel programming
 #'
 #' @return The function returns an object of TYPE S3 that will be used later in the prediction function

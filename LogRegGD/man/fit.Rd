@@ -26,11 +26,11 @@ fit(
 
 \item{max_iter}{is the number of iterations}
 
-\item{tol}{is the minimum movement allowed for each iteration}
+\item{tol}{the minimum movement allowed for each iteration}
 
-\item{eta}{is the learning rate for gradient descent}
+\item{eta}{the learning rate for gradient descent}
 
-\item{batch_size}{is the number of observations for the mini-batch mode}
+\item{batch_size}{the number of observations for the mini-batch mode}
 }
 \value{
 The function returns an object of TYPE S3 that will be used later in the prediction function
