@@ -22,9 +22,9 @@ GradDescente(
 
 \item{eta}{the learning rate for gradient descent. Default value: 0.3}
 
-\item{max_iter}{is the number of iterations,default value:: 500}
+\item{max_iter}{the number of iterations,default value:: 500}
 
-\item{tol}{is the minimum movement allowed for each iteration.Default value: 1e-3}
+\item{tol}{the minimum movement allowed for each iteration.Default value: 1e-3}
 
 \item{mode_desc}{the mode chosen to be used to update coefficients of stochastic gradient descent.We have 3 posiblities: {« batch », « online », « mini_batch »}}
 
@@ -33,7 +33,7 @@ GradDescente(
 \item{nc}{indicates the number of cores to be used in parallel programming}
 }
 \value{
-a list of (theta(coefficients), a  number of iteration and deviances)
+a list of (theta(coefficients), a number of iteration and deviances)
 }
 \description{
 Logistic regression function with gradient descent

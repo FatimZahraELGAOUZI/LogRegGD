@@ -58,7 +58,7 @@ FonctionCout <- function(expli, cible, coeff)
 #' @param coeff the logistic regression coefficients to be estimated
 #' @param learning_rate is the learning rate for gradient descent
 #' @param tolerance is the minimum movement allowed for each iteration
-#' @param convergence
+#' @param convergence   logical true/false
 #'
 #' @return  a list containing updated coefficients and convergence status
 #' @export
@@ -98,13 +98,13 @@ EvolEta <- function(learning_rate, nb_iter)
 #' @param x the predictor variables
 #' @param y the target (the variable to predict)
 #' @param eta the learning rate for gradient descent. Default value: 0.3
-#' @param max_iter is the number of iterations,default value:: 500
-#' @param tol is the minimum movement allowed for each iteration.Default value: 1e-3
+#' @param max_iter the number of iterations,default value:: 500
+#' @param tol the minimum movement allowed for each iteration.Default value: 1e-3
 #' @param mode_desc the mode chosen to be used to update coefficients of stochastic gradient descent.We have 3 posiblities: {« batch », « online », « mini_batch »}
 #' @param batch_size the number of observations for the mini-batch mode; Default value: 32
 #' @param nc indicates the number of cores to be used in parallel programming
 #'
-#' @return a list of (theta(coefficients), a  number of iteration and deviances)
+#' @return a list of (theta(coefficients), a number of iteration and deviances)
 #'
 #' @export
 #'
@@ -155,7 +155,7 @@ GradDescente <- function(x, y, eta = 0.3, max_iter = 500, tol = 1e-3, mode_desc=
       cout = sapply(list(x_tmp), FonctionCout, cible = y_tmp, coeff = coef)
       deviance = -2 * sum(cout)
       fonctionLoglos = c(fonctionLoglos, (-1/nrow(x_tmp))*sum(cout, na.rm = T))
-      plot(fonctionLoglos, type='l', xlab ='Iterations', ylab='Fonction de cout', main='Fonction de cout au fil des iterations')
+      plot(fonctionLoglos, type='l', xlab ='Iterations', ylab='Cost function', main='Cost function during iterations')
 
       # Pour la parallelisation
       if(nc > 1)
@@ -233,7 +233,7 @@ GradDescente <- function(x, y, eta = 0.3, max_iter = 500, tol = 1e-3, mode_desc=
       # Fonction de cout calculee a chaque iteration
       loglos = (-1/nrow(x_tmp))*sum(fonctionCost, na.rm = T)
       fonctionLoglos = c(fonctionLoglos,loglos)
-      plot(fonctionLoglos, type='l', xlab ='Iterations', ylab='Fonction de cout', main='Fonction de cout au fil des iterations')
+      plot(fonctionLoglos, type='l', xlab ='Iterations', ylab='Cost Function', main='Cost function during iterations')
 
       # Evolution du eta au fil des iterations
       eta = EvolEta(eta, iter)
@@ -285,7 +285,7 @@ GradDescente <- function(x, y, eta = 0.3, max_iter = 500, tol = 1e-3, mode_desc=
       # Fonction de cout calculee à chaque iteration
       loglos = (-1/nrow(x_tmp))*sum(fonctionCost, na.rm = T)
       fonctionLoglos = c(fonctionLoglos,loglos)
-      plot(fonctionLoglos, type='l', xlab ='Iterations', ylab='Fonction de cout', main='Fonction de cout au fil des iterations')
+      plot(fonctionLoglos, type='l', xlab ='Iterations', ylab='Cost Function', main='Cost function during iterations')
 
     }
 

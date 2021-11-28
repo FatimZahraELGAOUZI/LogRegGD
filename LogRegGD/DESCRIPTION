@@ -31,7 +31,6 @@ Imports:
     formula.tools,
     modelr,
     stats,
-    here,
     fastDummies,
     liver,
     rapportools,
@@ -39,4 +38,4 @@ Imports:
     tidyr,
     foreach,
     doParallel,
-    timeSeries
+    plyr

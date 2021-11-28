@@ -17,7 +17,7 @@ MajCoefficient(expli, cibles, coeff, learning_rate, tolerance, convergence)
 
 \item{tolerance}{is the minimum movement allowed for each iteration}
 
-\item{convergence}{}
+\item{convergence}{logical true/false}
 }
 \value{
 a list containing updated coefficients and convergence status

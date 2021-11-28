@@ -10,7 +10,7 @@
 \item{objet}{is the fitted object}
 }
 \value{
-
+summary of the results
 }
 \description{
 the generic "Summary" method

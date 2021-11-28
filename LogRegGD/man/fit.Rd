@@ -41,8 +41,8 @@ Fit function
 \examples{
  \dontrun{
  fit(formula, data)
- fit(formule, data,ncores=3, mode="batch",nnore=2)
- fit(formule, data,ncores=3, mode="mini-batch",max_iter = 500, tol = 1e-3, eta = 0.3,batch_size=32)
+ fit(formule, data, mode="batch",ncores=2)
+ fit(formule, data, mode="mini-batch",max_iter = 500, tol = 1e-3, eta = 0.3,batch_size=32)
  }
 
 }

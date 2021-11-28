@@ -19,8 +19,8 @@
 #' @examples
 #'  \dontrun{
 #'  fit(formula, data)
-#'  fit(formule, data,ncores=3, mode="batch",nnore=2)
-#'  fit(formule, data,ncores=3, mode="mini-batch",max_iter = 500, tol = 1e-3, eta = 0.3,batch_size=32)
+#'  fit(formule, data, mode="batch",ncores=2)
+#'  fit(formule, data, mode="mini-batch",max_iter = 500, tol = 1e-3, eta = 0.3,batch_size=32)
 #'  }
 #'
 fit <- function(formula, data, mode="batch", ncores=NULL, max_iter = 500, tol = 1e-3, eta = 0.3, batch_size = 32)
@@ -42,7 +42,7 @@ fit <- function(formula, data, mode="batch", ncores=NULL, max_iter = 500, tol = 
   y = data[["y"]]
 
   #Creation de l'instance
-  instance <- list(call=NULL,model=NULL,coefficient=NULL,formula=NULL,y=NULL,modalites= NULL,iter=NULL,mode=NULL,var=NULL,var_names=NULL, resdev = NULL, resdf = NULL, totdf = NULL, aic = NULL)
+  instance <- list(call=NULL,model=NULL,coefficient=NULL,formula=NULL,y=NULL,iter=NULL,mode=NULL,var=NULL,var_names=NULL, resdev = NULL, resdf = NULL, totdf = NULL, aic = NULL)
   #le modele
   instance$model= GradDescente(x, y, eta = eta, max_iter = max_iter, tol = tol, mode_desc=mode, batch_size=batch_size, nc = ncores)
   #l'appel à fonction fit
@@ -118,7 +118,7 @@ print.ObjectLogRegGD <- function(objet)
 #'
 #' @param objet is the fitted object
 #'
-#' @return
+#' @return summary of the results
 #' @export
 #'
 #' @examples
@@ -131,10 +131,8 @@ summary.ObjectLogRegGD <- function(objet)
   cat("############################################################################################################### \n")
   cat("\n")
   cat("Call : \n", paste(deparse(objet$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
-  print(objet$formula)
   print("Coefficients :")
   print(objet$coefficient)
-  cat("Gradient descent : ", objet$mode, "\n")
   cat("Nombre de variables explicatives : ", objet$var, "\n")
   cat("Noms des variables : ", objet$var_names,"\n")
   cat("Nombre d'itérations : ", objet$iter, "\n")
@@ -162,7 +160,8 @@ summary.ObjectLogRegGD <- function(objet)
 #'
 #' @examples
 #'  \dontrun{
-#'  predict(objet,newdata,type)
+#'  predict(objet,newdata,type= "class")
+#'  predict(objet,newdata,type= "posterior")
 #'  }
 
 
@@ -174,14 +173,14 @@ predict<-function (objet_Reg, newdata, type)
     stop("Object's class is not ObjectLogRegGD")
   }
 
-  # # controle des donnees
-  #  if (length(intersect(objet_Reg$var_names,colnames(newdata))) < objet_Reg$var)
-  #  {
-  #  stop("Nombre de variables differents")
-  #  }
+  #controle des donnees
+  if (length(intersect(all.vars(objet_Reg$call[[2]]),colnames(newdata))) == 0)
+  {
+    stop("Number of variables must be the same!")
+  }
   # controle du type
    if (type !="class"  &&  type != "posterior"){
-     stop("type's is not correct, you must be {\"class\" or \"posterior\"}")
+     stop("type is not correct, you must be {\"class\" or \"posterior\"}")
     }
 
   # recuperer x et y
@@ -225,7 +224,7 @@ predict<-function (objet_Reg, newdata, type)
     pred = ifelse(pi>=0.5,1,0)
     mc = table(y, pred)
     err = 1.0-sum(diag(mc))/sum(mc)
-    sen =
+
       return(list(pred = pred, mat_conf = mc, error = err))
   }
   else if (type=="posterior")

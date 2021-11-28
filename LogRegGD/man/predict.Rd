@@ -21,6 +21,7 @@ Predict function
 }
 \examples{
  \dontrun{
- predict(objet,newdata,type)
+ predict(objet,newdata,type= "class")
+ predict(objet,newdata,type= "posterior")
  }
 }
