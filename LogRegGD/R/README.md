@@ -9,7 +9,7 @@ This package allow you to fit, to predict and  </p>
 Installing the package
 ----------------------
 
- devtools::install_github("FatimZahraELGAOUZI/projetR")
+ sh devtools::install_github("FatimZahraELGAOUZI/projetR") sh
 
 Tutorial for package usage
 --------------------------
