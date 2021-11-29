@@ -99,7 +99,9 @@ controlerBatch<-function(batch_size,donnees,mode)
   {
     stop (ERREUR_BATCH_SIZE)
   }
+  return(batch_size)
 }
+
 
 
 #' max_iter's Control function

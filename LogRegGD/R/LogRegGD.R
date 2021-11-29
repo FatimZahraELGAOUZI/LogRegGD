@@ -38,7 +38,7 @@ fit <- function(formula, data, mode="batch", ncores=NULL, max_iter = 500, tol = 
 
   #Creation de l'instance
   instance <- list(call=NULL,model=NULL,coefficient=NULL,formula=NULL,input_data=NULL, y=NULL,iter=NULL,mode=NULL,var=NULL,var_names=NULL, resdev = NULL, resdf = NULL, totdf = NULL, aic = NULL)
-  # les données
+  # les donnees
   instance$input_data = data
   #Recuperation et transformation des x et y
   y = formule_extract_cible(formula, data)
