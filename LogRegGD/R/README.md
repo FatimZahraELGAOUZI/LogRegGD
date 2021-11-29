@@ -8,4 +8,10 @@ This package allow you to fit, to predict and  </p>
 
 Installing the package
 ----------------------
+
  devtools::install_github("FatimZahraELGAOUZI/projetR")
+
+Tutorial for package usage
+--------------------------
+
+### Loading the library
