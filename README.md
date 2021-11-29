@@ -56,7 +56,7 @@ Let's start with batch mode:
  ```sh 
  print(objet)
   ```
- [image](https://user-images.githubusercontent.com/92757617/143952246-8e9f9773-ca7c-4beb-93b6-d742489de1c8.png)
+ ![image](https://user-images.githubusercontent.com/92757617/143952246-8e9f9773-ca7c-4beb-93b6-d742489de1c8.png)
 
  ```sh 
   summary(objet)
@@ -68,6 +68,7 @@ You can also access the different components of your object using $ (example : o
 ![image](https://user-images.githubusercontent.com/92757617/143952583-15234094-8b6c-49a2-a230-764e093febc2.png)
 
  Also, you can show a plot to look at the how the cost varies with iterations
+ 
  ![image](https://user-images.githubusercontent.com/92757617/143952619-70fecce5-ccd2-4f4b-9682-1c8d825717e9.png)
 
  For the mini-batch mode, you need to specify "batch size" (Default value is 32):
@@ -85,16 +86,20 @@ You can also access the different components of your object using $ (example : o
  ### Predict function 
  
 You use the S3 object provided by the function fit() to make the prediction. You indicates the type of prediction {“class”: predicted class , “posterior”:belonging class probability}
+
 ```sh 
 prediction <- predict(objet, test, "class")
  ```
 The result of this function is the "predite classes", a confusion matrix and error rate to evaluate your model
 You can also access the different components of your result using $ (Example)
+
 ![image](https://user-images.githubusercontent.com/92757617/143952872-7a53b558-b19d-4b03-9bef-85bf995ec1d9.png)
+
 ```sh 
 prediction <- predict(objet, test, "posterior")
  ```
 The result of this function is a vector of belonging class probability. You can use the head(prediction) to visualise the first rows of your membership class probability.
+
 ![image](https://user-images.githubusercontent.com/92757617/143953026-2e67051c-2e2d-4b61-a7ed-3c340d9cc6dc.png)
 
 For more details about the predict function, you can use the help function: **_`help(predict)`_**
