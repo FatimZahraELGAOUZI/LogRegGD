@@ -83,6 +83,7 @@ MajCoefficient <- function(expli, cibles, coeff, learning_rate, tolerance, conve
 #' @param nb_iter number of iterationn
 #'
 #' @return
+#' @export
 
 #'
 EvolEta <- function(learning_rate, nb_iter)
@@ -103,6 +104,7 @@ EvolEta <- function(learning_rate, nb_iter)
 #' @param mode_desc the mode chosen to be used to update coefficients of stochastic gradient descent.We have 3 posiblities: {« batch », « online », « mini_batch »}
 #' @param batch_size the number of observations for the mini-batch mode; Default value: 32
 #' @param nc indicates the number of cores to be used in parallel programming
+#'
 #'
 #' @return a list of (theta(coefficients), a number of iteration and deviances)
 #'

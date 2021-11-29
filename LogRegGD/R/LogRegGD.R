@@ -88,6 +88,7 @@ fit <- function(formula, data, mode="batch", ncores=NULL, max_iter = 500, tol = 
 #'
 #' @param objet is the fitted object
 #'
+#'
 #' @return
 #' @export
 #'

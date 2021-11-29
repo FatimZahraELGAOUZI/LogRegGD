@@ -16,6 +16,7 @@ ERREUR_ITER_MAX="max_iter must imperatively be positive"
 #' @param formula a symbolic description of the model to be fitted
 #'
 #' @return Error message:"Formula must be R formula !"
+#' @export
 #'
 controlerFormula <- function(formula)
 {
@@ -31,7 +32,7 @@ controlerFormula <- function(formula)
 #' @param data the dataframe containing the variables in the model
 #'
 #' @return Error message:"The input is not a dataframe !"
-#'
+#' @export
 #'
 controlerDataType <- function (data)
 {
