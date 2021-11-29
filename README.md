@@ -14,7 +14,7 @@ During the training process, a plot is used to visualize the cost function over 
 Installing the package
 ----------------------
  ```sh 
- devtools::install_github("FatimZahraELGAOUZI/projetR") 
+ devtools::install_github("FatimZahraELGAOUZI/LogRegGD/LogRegGD", ref="main" )
  ```
 
 Tutorial for package usage
