@@ -20,6 +20,7 @@ Tutorial for package usage
 --------------------------
 
 ### Loading the library
+
 <p>First, you need to import a dataset (with numerical, categorical
 variables or both). In this example, we’ll be using the "Adult"
 dataset. This dataset is included in the dataset Rstudio. </p>
@@ -47,7 +48,7 @@ Let's start with batch mode:
 ```sh 
  objet <- fit(income ~  age + workclass + demogweight + gender, train, mode="batch", eta = 0.3, max_iter = 500, tol = 1e-3)
  ```
- You can also use a parallel programming to make execution faster.just add the ncores parameter and specify the number of cores to use
+ You can also use a parallel programming to make execution faster. Just add the ncores parameter and specify the number of cores to use:
  ```sh 
  system.time(objet <- fit(income ~  age + workclass + demogweight + gender, train, mode="batch",eta = 0.3, max_iter = 500, tol = 1e-3, ncores = 3))
  ```
@@ -59,20 +60,20 @@ Let's start with batch mode:
  <p>You can also access the different components of your object using $ (example : objet$coefficient). You can find a list of componenets calling the **_`attributes`_**
   Rfunction </p>
  
- Also, you can show a plot to look at the how the cost varies with iterations. 
+ Also, you can show a plot to look at the how the cost varies with iterations
+ 
 ```sh 
- print(objet)
- summary(objet)
+
  ```
- For the mini-batch mode, you need to specify "batch size"(Default value is 32):
+ For the mini-batch mode, you need to specify "batch size" (Default value is 32):
 ```sh 
  objet <- fit(income ~  age + workclass + demogweight + gender, train, mode="mini-batch", batch_size = 32, eta = 0.3, max_iter = 500, tol = 1e-3)
  ```
- 
  And if you want to use the online mode:
 ```sh 
  objet <- fit(income ~  age + workclass + demogweight + gender, train, mode="online", eta = 0.3, max_iter = 500, tol = 1e-3)
  ```
-
  For more details about the fit function, you can use the help function: **_`help(fit)`_**
+ 
+ 
  
