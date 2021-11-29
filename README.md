@@ -62,9 +62,10 @@ Let's start with batch mode:
   summary(objet)
   ```
 ![image](https://user-images.githubusercontent.com/92757617/143952367-d7e8ae56-77bf-479a-a3c8-7f12f6a0e5f5.png)
+
 You can also access the different components of your object using $ (example : objet$coefficient). You can find a list of componenets calling the  **_`attributes(objet)`_** Rfunction:
  
- ![image](https://user-images.githubusercontent.com/92757617/143952583-15234094-8b6c-49a2-a230-764e093febc2.png)
+![image](https://user-images.githubusercontent.com/92757617/143952583-15234094-8b6c-49a2-a230-764e093febc2.png)
 
  Also, you can show a plot to look at the how the cost varies with iterations
  ![image](https://user-images.githubusercontent.com/92757617/143952619-70fecce5-ccd2-4f4b-9682-1c8d825717e9.png)
