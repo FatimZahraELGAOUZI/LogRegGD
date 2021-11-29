@@ -18,7 +18,14 @@ Tutorial for package usage
 --------------------------
 
 ### Loading the library
-First, you need to import a dataset (with numerical, categorical
+<p>First, you need to import a dataset (with numerical, categorical
 variables or both). In this example, we’ll be using the "Adult"
-dataset. This dataset is included in the dataset Rstudio
+dataset. This dataset is included in the dataset Rstudio. 
+ </p>
 ###  Import Dataset 
+
+
+###  Transform Dataset 
+The NA of our dataset is in the form of "?" we need to transform them into "NA".This step concerns only this data set
+
+
