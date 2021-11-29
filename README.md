@@ -8,7 +8,8 @@ The LogRegGD is a package which allow you to do a logistic regression using the 
   <li>Mini-batch mode</li>
   <li>Online mode</li>
  </ul>
-This package allow you to fit, to predict and  </p>
+The RegLogGD package standardizes numeric variables, manages categorical variables by creating dummy variables, then trains a binary logistic regression model on training data, and finally predicts on test data.
+During the training process, a plot is used to visualize the cost function over the iterations  </p>
 
 Installing the package
 ----------------------
