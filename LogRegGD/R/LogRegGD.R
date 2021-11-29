@@ -34,25 +34,29 @@ fit <- function(formula, data, mode="batch", ncores=NULL, max_iter = 500, tol = 
   batch_size=controlerBatch(batch_size, data,mode)
   ncores=ncores(ncores)
 
-  #Récupération et transformation des x et y
+
+
+  #Creation de l'instance
+  instance <- list(call=NULL,model=NULL,coefficient=NULL,formula=NULL,input_data=NULL, y=NULL,iter=NULL,mode=NULL,var=NULL,var_names=NULL, resdev = NULL, resdf = NULL, totdf = NULL, aic = NULL)
+  # les donn�es
+  instance$input_data = data
+  #Recuperation et transformation des x et y
   y = formule_extract_cible(formula, data)
   xtemp = formule_donnees_exp(formula, data)
   data = tranformDataset(xtemp,y)
   x = data[["x"]]
   y = data[["y"]]
 
-  #Creation de l'instance
-  instance <- list(call=NULL,model=NULL,coefficient=NULL,formula=NULL,y=NULL,iter=NULL,mode=NULL,var=NULL,var_names=NULL, resdev = NULL, resdf = NULL, totdf = NULL, aic = NULL)
   #le modele
   instance$model= GradDescente(x, y, eta = eta, max_iter = max_iter, tol = tol, mode_desc=mode, batch_size=batch_size, nc = ncores)
-  #l'appel à fonction fit
+  #l'appel a la fonction fit
   call<-match.call()
   instance$call=call
   #les coefficients
   instance$coefficient=instance$model$coef
   #la formule
   instance$formula=formula
-  #la variable à expliquer
+  #la variable a expliquer
   instance$y=y
   #le nombre de variables explicatives
   instance$var <- ncol(x)
@@ -99,6 +103,7 @@ print.ObjectLogRegGD <- function(objet)
   cat("\n")
   cat("Call : \n", paste(deparse(objet$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
   print(objet$formula)
+  cat("Gradient descent : ", objet$mode, "\n")
   cat("Nombre de variables explicatives : ", objet$var, "\n")
   cat("Noms des variables : ", objet$var_names,"\n")
   cat("Nombre d'itérations : ", objet$iter, "\n")
@@ -165,6 +170,7 @@ summary.ObjectLogRegGD <- function(objet)
 #'  }
 
 
+
 predict<-function (objet_Reg, newdata, type)
 {
   #controle de l'objet
@@ -173,15 +179,16 @@ predict<-function (objet_Reg, newdata, type)
     stop("Object's class is not ObjectLogRegGD")
   }
 
-  #controle des donnees
-  if (length(intersect(all.vars(objet_Reg$call[[2]]),colnames(newdata))) == 0)
+  # controle des donnees
+  if (FALSE %in% (colnames(newdata) %in% colnames(objet_Reg$input_data)))
   {
-    stop("Number of variables must be the same!")
+    stop(" Number of variables must be the same")
   }
+
   # controle du type
-   if (type !="class"  &&  type != "posterior"){
-     stop("type is not correct, you must be {\"class\" or \"posterior\"}")
-    }
+  if (type !="class"  &&  type != "posterior"){
+    stop("type  is not correct, you must be {\"class\" or \"posterior\"}")
+  }
 
   # recuperer x et y
   px = formule_donnees_exp(objet_Reg$formula, newdata)
@@ -191,6 +198,7 @@ predict<-function (objet_Reg, newdata, type)
   pquali = transformQuali(px) # remplacer NA quali par mode
   pquanti = transformQuanti(px) # on remplace les NA par mean(newdata)
   y = tranformDataset(px,py)$y
+  colnames(y) = "y"
 
   #centrer et reduire
   # Recuperation des moyennes et des ecarts types des donnees
@@ -198,11 +206,12 @@ predict<-function (objet_Reg, newdata, type)
   stdvs<-objet_Reg$Xsd
   # On utilise les moyennes et les ecarts types des donnees d'entrainement pour centrer et reduire les donnees tests
   res = as.data.frame(combine(pquali,pquanti))
-  res = scale(res, center = means[colnames(res)], scale = stdvs[colnames(res)])[,]
-
-  newdata = as.data.frame(cbind(res,y))
+  res2 = as.data.frame(scale(res, center = means[colnames(res)], scale = stdvs[colnames(res)])[,])
+  colnames(res2) = colnames(res)
+  newdata = as.data.frame(cbind(res2,y))
 
   x = as.data.frame(newdata[,intersect(objet_Reg$var_names, colnames(newdata))])
+  colnames(x) = intersect(objet_Reg$var_names, colnames(newdata))
 
   #recuperer les variables dans l'ordre
   pnewdata <- as.data.frame(x[,colnames(x) %in% objet_Reg$var_names])
@@ -224,14 +233,12 @@ predict<-function (objet_Reg, newdata, type)
     pred = ifelse(pi>=0.5,1,0)
     mc = table(y, pred)
     err = 1.0-sum(diag(mc))/sum(mc)
-
-      return(list(pred = pred, mat_conf = mc, error = err))
+    return(list(pred = pred, mat_conf = mc, error = err))
   }
   else if (type=="posterior")
   {
-    # probabilite d’appartenance aux classes
+    # probabilite d appartenance aux classes
     pred <- pi
     return(pred = pred)
   }
 }
-
