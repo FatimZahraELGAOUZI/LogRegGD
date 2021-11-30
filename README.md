@@ -24,11 +24,12 @@ Tutorial for package usage
 
 <p>First, you need to import a dataset (with numerical, categorical
 variables or both). In this example, we’ll be using the "Adult"
-dataset. This dataset is included in the dataset Rstudio. </p>
+dataset. This dataset is included in the dataset library(liver) Rstudio. </p>
 
 ###  Import Dataset
 
 ```sh
+Library(liver)
 data("adult")
 ```
 ###  Transform Dataset 
@@ -91,7 +92,7 @@ You use the S3 object provided by the function fit() to make the prediction. You
 ```sh 
 prediction <- predict(objet, test, "class")
  ```
-The result of this function is the "predite classes", a confusion matrix and error rate to evaluate your model
+The result of this function is the "predite classes", a confusion matrix and error rate to evaluate your model.
 You can also access the different components of your result using $ (Example)
 
 ![image](https://user-images.githubusercontent.com/92757617/143952872-7a53b558-b19d-4b03-9bef-85bf995ec1d9.png)
